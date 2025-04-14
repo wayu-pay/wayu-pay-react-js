@@ -17,16 +17,10 @@ const meta: Meta<typeof WayuPaymentFlow> = {
   },
   tags: ['autodocs'], // Genera documentación automáticamente
   argTypes: {
-    // Aquí puedes definir controles para las props en Storybook
-    transactionId: {
-      control: 'text',
-      description: 'ID único de la transacción',
-    },
     className: { control: 'text', description: 'Clase CSS adicional para el contenedor' },
     style: { control: 'object', description: 'Estilos en línea para el contenedor' },
     onComplete: { action: 'completed', description: 'Callback llamado al completar el flujo' },
     onError: { action: 'error', description: 'Callback llamado si ocurre un error' },
-    // No incluimos `banks` aquí porque ahora es interno
   },
 };
 
@@ -56,7 +50,6 @@ const Template: Story['render'] = (args) => {
       {/* Pass required props explicitly, spread the rest, override onComplete */}
       <WayuPaymentFlow 
         {...args} // Spread args first (includes style, className, etc.)
-        transactionId={args.transactionId} // Ensure required prop is explicitly passed
         onComplete={handleComplete} // Use our wrapper for onComplete
         // onError is passed via {...args}
       />
@@ -76,7 +69,6 @@ const Template: Story['render'] = (args) => {
 export const Default: Story = {
   render: Template, 
   args: {
-    transactionId: 'tx-12345',
     onError: (error: Error) => console.error('Payment Error:', error),
     style: { minWidth: '350px' }, 
     // Add a placeholder onComplete action to args if needed for demonstration
