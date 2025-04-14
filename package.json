@@ -1,6 +1,6 @@
 {
-  "name": "wayu-pay-react",
-  "version": "1.0.0",
+  "name": "wayu-pay-react-components",
+  "version": "1.0.0-alpha.0",
   "description": "React component library for Wayu Pay flow",
   "type": "module",
   "main": "./dist/wayu-pay-react.umd.js",
@@ -19,9 +19,11 @@
     "react",
     "wayu-pay",
     "component",
-    "library"
+    "library",
+    "payment",
+    "venezuela"
   ],
-  "author": "",
+  "author": "javff",
   "license": "ISC",
   "peerDependencies": {
     "react": ">=18",
