@@ -29,8 +29,8 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
   const [currentStep, setCurrentStep] = useState<'selectBank' | 'enterDetails'>('selectBank');
   const [selectedBank, setSelectedBank] = useState<Bank | null>(null);
   const [formData, setFormData] = useState<FormData>({
-    ciType: 'V',
-    ciNumber: '',
+    documentType: 'V',
+    documentNumber: '',
     phoneNumber: '',
     c2pCode: '',
   });
@@ -62,7 +62,7 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
       setCurrentStep('selectBank'); // Volver al paso anterior si falta el banco
       return;
     }
-    if (!formData.ciNumber || !formData.phoneNumber || !formData.c2pCode) {
+    if (!formData.documentNumber || !formData.phoneNumber || !formData.c2pCode) {
         setError('Por favor, completa todos los campos.');
         return;
     }
@@ -79,8 +79,8 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
     setCurrentStep('selectBank');
     setSelectedBank(null);
     setFormData({
-        ciType: 'V',
-        ciNumber: '',
+        documentType: 'V',
+        documentNumber: '',
         phoneNumber: '',
         c2pCode: '',
     });

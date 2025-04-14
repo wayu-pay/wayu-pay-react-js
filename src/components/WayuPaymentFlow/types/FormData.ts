@@ -1,6 +1,6 @@
 export interface FormData {
-  ciType: 'V' | 'E';
-  ciNumber: string;
+  documentType: 'V' | 'E';
+  documentNumber: string;
   phoneNumber: string;
   c2pCode: string;
 } 

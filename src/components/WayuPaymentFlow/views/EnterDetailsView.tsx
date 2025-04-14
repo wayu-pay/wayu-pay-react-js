@@ -23,30 +23,30 @@ const EnterDetailsView: React.FC<EnterDetailsViewProps> = ({
       <h3 className={styles.stepTitle}>2. Ingresa tus datos ({selectedBank.name})</h3>
       
       <div className={styles.formGroup}>
-        <label htmlFor="ci" className={styles.label}>Cédula de Identidad</label>
+        <label htmlFor="documentNumber" className={styles.label}>Documento de Identidad</label>
         <div className={styles.ciGroup}>
           <select 
-            name="ciType" 
-            value={formData.ciType} 
-            onChange={onInputChange} 
-            className={styles.selectInput} 
-            aria-label="Tipo de Cédula"
+            name="documentType"
+            value={formData.documentType}
+            onChange={onInputChange}
+            className={styles.selectInput}
+            aria-label="Tipo de Documento"
           >
             <option value="V">V</option>
             <option value="E">E</option>
           </select>
           <input
             type="text" 
-            id="ciNumber"
-            name="ciNumber"
-            value={formData.ciNumber}
+            id="documentNumber"
+            name="documentNumber"
+            value={formData.documentNumber}
             onChange={onInputChange}
             placeholder="Ej: 12345678"
             required
             pattern="[0-9]*" 
             inputMode="numeric" 
             className={styles.textInput}
-            aria-label="Número de Cédula"
+            aria-label="Número de Documento"
           />
         </div>
       </div>
