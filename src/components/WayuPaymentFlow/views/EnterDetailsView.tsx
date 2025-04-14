@@ -1,33 +1,34 @@
 import React from 'react';
-import { Bank, FormData } from './types';
-import styles from '@/components/WayuPaymentFlow/WayuPaymentFlow.module.css';
+import { Bank } from '../types/Bank';
+import { FormData } from '../types/FormData';
+import styles from '../WayuPaymentFlow.module.css';
 
-interface DetailsFormStepProps {
+interface EnterDetailsViewProps {
   selectedBank: Bank;
   formData: FormData;
-  onFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onBack: () => void;
 }
 
-const DetailsFormStep: React.FC<DetailsFormStepProps> = ({
+const EnterDetailsView: React.FC<EnterDetailsViewProps> = ({
   selectedBank,
   formData,
-  onFormChange,
+  onInputChange,
   onSubmit,
   onBack,
 }) => {
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} className={styles.stepContainer}> 
       <h3 className={styles.stepTitle}>2. Ingresa tus datos ({selectedBank.name})</h3>
-
+      
       <div className={styles.formGroup}>
-        <label htmlFor="ciNumber" className={styles.label}>Cédula de Identidad</label> 
+        <label htmlFor="ci" className={styles.label}>Cédula de Identidad</label>
         <div className={styles.ciGroup}>
           <select 
             name="ciType" 
             value={formData.ciType} 
-            onChange={onFormChange} 
+            onChange={onInputChange} 
             className={styles.selectInput} 
             aria-label="Tipo de Cédula"
           >
@@ -36,10 +37,10 @@ const DetailsFormStep: React.FC<DetailsFormStepProps> = ({
           </select>
           <input
             type="text" 
-            id="ciNumber" // Mantener id para el label
+            id="ciNumber"
             name="ciNumber"
             value={formData.ciNumber}
-            onChange={onFormChange}
+            onChange={onInputChange}
             placeholder="Ej: 12345678"
             required
             pattern="[0-9]*" 
@@ -57,7 +58,7 @@ const DetailsFormStep: React.FC<DetailsFormStepProps> = ({
           id="phoneNumber"
           name="phoneNumber"
           value={formData.phoneNumber}
-          onChange={onFormChange}
+          onChange={onInputChange}
           placeholder="Ej: 04141234567"
           required
           className={styles.textInput}
@@ -71,7 +72,7 @@ const DetailsFormStep: React.FC<DetailsFormStepProps> = ({
           id="c2pCode"
           name="c2pCode"
           value={formData.c2pCode}
-          onChange={onFormChange}
+          onChange={onInputChange}
           placeholder="Ingresa el código"
           required
           maxLength={6} 
@@ -91,4 +92,4 @@ const DetailsFormStep: React.FC<DetailsFormStepProps> = ({
   );
 };
 
-export default DetailsFormStep; 
+export default EnterDetailsView; 

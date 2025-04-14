@@ -1,15 +1,15 @@
 import React from 'react';
-import { Bank } from './types'; // Actualizado: Importar desde el mismo directorio
-import styles from '@/components/WayuPaymentFlow/WayuPaymentFlow.module.css'; // Usando alias
+import { Bank } from '../types/Bank';
+import styles from '../WayuPaymentFlow.module.css';
 
-interface BankSelectionStepProps {
+interface SelectBankViewProps {
   banks: Bank[];
   onBankSelect: (bank: Bank) => void;
 }
 
-const BankSelectionStep: React.FC<BankSelectionStepProps> = ({ banks, onBankSelect }) => {
+const SelectBankView: React.FC<SelectBankViewProps> = ({ banks, onBankSelect }) => {
   return (
-    <div>
+    <div className={styles.stepContainer}> 
       <h3 className={styles.stepTitle}>1. Selecciona tu banco</h3>
       <ul className={styles.bankList}>
         {banks.map((bank) => (
@@ -22,4 +22,4 @@ const BankSelectionStep: React.FC<BankSelectionStepProps> = ({ banks, onBankSele
   );
 };
 
-export default BankSelectionStep; 
+export default SelectBankView; 

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import styles from './WayuPaymentFlow.module.css'; // Importa los CSS Modules
-import { Bank, FormData } from '@/internal/WayuPaymentFlow/types'; // Usando alias
-import BankSelectionStep from '@/internal/WayuPaymentFlow/BankSelectionStep'; // Usando alias
-import DetailsFormStep from '@/internal/WayuPaymentFlow/DetailsFormStep'; // Usando alias
+import { Bank } from './types/Bank';
+import { FormData } from './types/FormData';
+import { WayuPaymentFlowProps } from './types/WayuPaymentFlowProps';
+import SelectBankView from './views/SelectBankView';
+import EnterDetailsView from './views/EnterDetailsView';
+
+// Tipos de datos
 
 // Lista de bancos interna (Ejemplo con bancos de Venezuela)
 const internalBanks: Bank[] = [
@@ -15,21 +19,8 @@ const internalBanks: Bank[] = [
   // ... Añadir más bancos según sea necesario
 ];
 
-// Define las props que recibirá el componente
-interface WayuPaymentFlowProps {
-  // Ejemplo: un ID de la transacción o configuración inicial
-  transactionId: string;
-  // Podríamos añadir props para personalizar estilos o clases
-  className?: string;
-  style?: React.CSSProperties;
-  // Callback para cuando el flujo se completa
-  onComplete?: (data: { bank: Bank; formData: FormData }) => void;
-  // Callback para errores
-  onError?: (error: Error | string) => void; // Permitir error string también
-}
-
 const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
-  // transactionId, // Descomentar si se usa
+  transactionId,
   className,
   style,
   onComplete,
@@ -45,15 +36,16 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
   });
   const [error, setError] = useState<string | null>(null);
 
+  // Usamos la lista interna
   const banks = internalBanks;
 
   const handleBankSelect = (bank: Bank) => {
     setSelectedBank(bank);
     setCurrentStep('enterDetails');
-    setError(null);
+    setError(null); // Limpiar errores al cambiar de paso
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -64,43 +56,36 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+    // Aquí iría la validación de los datos
     if (!selectedBank) {
       setError('Error interno: No se seleccionó ningún banco.');
-      if (onError) onError('Error interno: No se seleccionó ningún banco.');
-      setCurrentStep('selectBank');
+      setCurrentStep('selectBank'); // Volver al paso anterior si falta el banco
       return;
     }
-    // Validación básica (se puede expandir)
-    if (!formData.ciNumber || !/^[0-9]+$/.test(formData.ciNumber)) {
-      setError('Por favor, ingresa un número de cédula válido.');
-      if (onError) onError('Cédula inválida');
-      return;
-    }
-    if (!formData.phoneNumber || !/^[0-9]{10,11}$/.test(formData.phoneNumber)) {
-      setError('Por favor, ingresa un número de teléfono válido (10 u 11 dígitos).');
-       if (onError) onError('Teléfono inválido');
-      return;
-    }
-    if (!formData.c2pCode || formData.c2pCode.length < 4) { // Ejemplo: mínimo 4 caracteres
-      setError('Por favor, ingresa un código C2P válido.');
-       if (onError) onError('Código C2P inválido');
-      return;
+    if (!formData.ciNumber || !formData.phoneNumber || !formData.c2pCode) {
+        setError('Por favor, completa todos los campos.');
+        return;
     }
 
     console.log('Submitting payment details:', { bank: selectedBank, formData });
+
+    // Llamar al callback onComplete con los datos recolectados
     if (onComplete) {
       onComplete({ bank: selectedBank, formData });
     }
-    // Aquí podrías añadir lógica para mostrar un estado de éxito/carga 
-    // antes de llamar a onComplete o después de una llamada API.
   };
 
   const handleBack = () => {
     setCurrentStep('selectBank');
     setSelectedBank(null);
+    setFormData({
+        ciType: 'V',
+        ciNumber: '',
+        phoneNumber: '',
+        c2pCode: '',
+    });
     setError(null);
-  };
+  }
 
   // Combina las clases del módulo con la clase externa si existe
   const containerClassName = `${styles.container} ${className || ''}`.trim();
@@ -109,28 +94,25 @@ const WayuPaymentFlow: React.FC<WayuPaymentFlowProps> = ({
     <div className={containerClassName} style={style}>
       <h2 className={styles.title}>Wayu Payment Flow</h2>
       
-      <div className={styles.content}> {/* Mantenemos un contenedor para la animación */} 
+      <div className={styles.content}> {/* Envuelve el contenido principal */} 
         {error && <p className={styles.errorMessage}>{error}</p>}
   
-        <div className={styles.stepContainer}> {/* Mantenemos un contenedor para la animación */} 
-          {currentStep === 'selectBank' && (
-            <BankSelectionStep 
-              banks={banks} 
-              onBankSelect={handleBankSelect} 
-            />
-          )}
-    
-          {currentStep === 'enterDetails' && selectedBank && (
-            <DetailsFormStep
-              selectedBank={selectedBank}
-              formData={formData}
-              onFormChange={handleFormChange}
-              onSubmit={handleSubmit}
-              onBack={handleBack}
-            />
-          )}
-        </div>
-      </div>
+        {/* Paso 1: Seleccionar Banco */} 
+        {currentStep === 'selectBank' && (
+          <SelectBankView banks={banks} onBankSelect={handleBankSelect} />
+        )}
+  
+        {/* Paso 2: Ingresar Detalles */} 
+        {currentStep === 'enterDetails' && selectedBank && (
+           <EnterDetailsView 
+             selectedBank={selectedBank}
+             formData={formData}
+             onInputChange={handleInputChange}
+             onSubmit={handleSubmit}
+             onBack={handleBack}
+           />
+        )}
+      </div> {/* Fin de .content */} 
 
       <footer className={styles.footer}>
         <span>Powered by <strong>Wayu Pay</strong></span>
