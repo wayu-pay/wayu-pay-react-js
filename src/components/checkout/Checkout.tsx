@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BsCreditCard, BsPhone, BsBank, BsCurrencyBitcoin } from 'react-icons/bs';
 import C2P from '../C2P/C2P';
-import Modal from '../Modal';
+import CreditCard from '../CreditCard/CreditCard';
+import MercantilDebit from '../MercantilDebit/MercantilDebit';
+import Crypto from '../Crypto/Crypto';
 
 export interface CheckoutProps {
   onComplete?: (data: any) => void;
@@ -12,30 +14,10 @@ export interface CheckoutProps {
 const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [showWayuFlow, setShowWayuFlow] = useState(false);
+  const [showCreditCard, setShowCreditCard] = useState(false);
+  const [showMercantilDebit, setShowMercantilDebit] = useState(false);
+  const [showCrypto, setShowCrypto] = useState(false);
   
-  // Estados para los formularios
-  const [ccFormData, setCcFormData] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvc: '',
-    cardholderName: ''
-  });
-  const [isCcFormValid, setIsCcFormValid] = useState(false);
-  const [cryptoSelected, setCryptoSelected] = useState('BTC');
-  const [isCryptoValid, setIsCryptoValid] = useState(true); // Por defecto es válido
-
-  // Validar formulario de tarjeta de crédito
-  useEffect(() => {
-    const { cardNumber, expiryDate, cvc, cardholderName } = ccFormData;
-    const isValid = 
-      cardNumber.trim() !== '' && 
-      expiryDate.trim() !== '' && 
-      cvc.trim() !== '' && 
-      cardholderName.trim() !== '';
-    
-    setIsCcFormValid(isValid);
-  }, [ccFormData]);
-
   const handleCardClick = (optionId: string) => {
     if (onPaymentStart) {
       onPaymentStart();
@@ -43,11 +25,26 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart
     
     setSelectedOption(optionId);
     
-    // Si se selecciona la opción de Pago Móvil, mostrar el C2P
-    if (optionId === 'pagoMovil') {
-      setShowWayuFlow(true);
-    } else {
-      setShowWayuFlow(false);
+    // Resetear todos los estados de visualización
+    setShowWayuFlow(false);
+    setShowCreditCard(false);
+    setShowMercantilDebit(false);
+    setShowCrypto(false);
+    
+    // Activar el componente correspondiente según la opción seleccionada
+    switch(optionId) {
+      case 'pagoMovil':
+        setShowWayuFlow(true);
+        break;
+      case 'creditCard':
+        setShowCreditCard(true);
+        break;
+      case 'mercantilDebit':
+        setShowMercantilDebit(true);
+        break;
+      case 'crypto':
+        setShowCrypto(true);
+        break;
     }
   };
 
@@ -55,40 +52,19 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart
     // Resetear el estado para volver a mostrar todas las opciones de pago
     setSelectedOption(null);
     setShowWayuFlow(false);
-    // Limpiar datos de formularios
-    setCcFormData({
-      cardNumber: '',
-      expiryDate: '',
-      cvc: '',
-      cardholderName: ''
-    });
-    setCryptoSelected('BTC');
+    setShowCreditCard(false);
+    setShowMercantilDebit(false);
+    setShowCrypto(false);
   };
 
-  const handleCcInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    const fieldName = id.replace('cc-', '');
-    setCcFormData(prev => ({
-      ...prev,
-      [fieldName]: value
-    }));
-  };
-
-  const handleCryptoSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCryptoSelected(e.target.value);
-  };
-
-  const handleWayuComplete = (data: any) => {
-    // Cerrar el flujo de Wayu y pasar los datos al callback principal
-    setShowWayuFlow(false);
+  const handlePaymentComplete = (data: any) => {
     if (onComplete) {
       onComplete(data);
     }
-    // Después de mostrar el JSON con los datos, volver a mostrar todas las opciones
-    // Nota: No resetear completamente para que se vea el JSON con los datos del pago
+    resetToInitialState();
   };
 
-  const handleWayuError = (error: any) => {
+  const handlePaymentError = (error: any) => {
     if (onError) {
       onError(error);
     }
@@ -116,7 +92,7 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart
     const cryptoData = {
       method: 'crypto',
       paymentInfo: {
-        currency: cryptoSelected,
+        currency: 'BTC',
         amount: '0.0025',
         walletAddress: '0x1234567890abcdef',
         transactionId: `CRYPTO-${Math.floor(Math.random() * 1000000)}`,
@@ -155,188 +131,42 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart
     },
   ];
 
-  // Renderizar el componente C2P si se selecciona la opción de Pago Móvil
+  // Renderizar el componente correspondiente según la opción seleccionada
   if (showWayuFlow) {
     return (
       <C2P 
-        onComplete={handleWayuComplete} 
-        onError={handleWayuError}
-        onBack={() => setShowWayuFlow(false)}
+        onComplete={handlePaymentComplete} 
+        onError={handlePaymentError}
+        onBack={resetToInitialState}
       />
     );
   }
 
-  // Mostrar los formularios específicos para cada método de pago
-  const renderPaymentForm = () => {
-    if (!selectedOption || selectedOption === 'pagoMovil') return null;
-
+  if (showCreditCard) {
     return (
-      <div className="max-w-3xl mx-auto p-5 md:p-8 my-6 font-sans bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">
-            {paymentOptions.find(option => option.id === selectedOption)?.title}
-          </h2>
-          <button 
-            onClick={resetToInitialState}
-            className="text-gray-400 hover:text-gray-700"
-            aria-label="Volver a opciones de pago"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {selectedOption === 'creditCard' && (
-          <div>
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              if (!isCcFormValid) return;
-              
-              // Simular datos del pago con tarjeta de crédito
-              const creditCardData = {
-                method: 'creditCard',
-                paymentInfo: {
-                  cardNumber: ccFormData.cardNumber || '**** **** **** 1234',
-                  expiryDate: ccFormData.expiryDate || '12/25',
-                  cardholderName: ccFormData.cardholderName || 'Usuario de Prueba',
-                  cvc: ccFormData.cvc || '123'
-                }
-              };
-              if (onComplete) {
-                onComplete(creditCardData);
-              }
-              resetToInitialState();
-            }}>
-              <div className="mb-4">
-                <label htmlFor="cc-cardNumber" className="block text-sm font-medium text-gray-700 mb-1">Número de Tarjeta</label>
-                <input 
-                  type="text" 
-                  id="cc-cardNumber" 
-                  value={ccFormData.cardNumber}
-                  onChange={handleCcInputChange}
-                  placeholder="**** **** **** ****" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label htmlFor="cc-expiryDate" className="block text-sm font-medium text-gray-700 mb-1">Vencimiento</label>
-                  <input 
-                    type="text" 
-                    id="cc-expiryDate" 
-                    value={ccFormData.expiryDate}
-                    onChange={handleCcInputChange}
-                    placeholder="MM/AA" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
-                  />
-                </div>
-                <div>
-                  <label htmlFor="cc-cvc" className="block text-sm font-medium text-gray-700 mb-1">CVC</label>
-                  <input 
-                    type="text" 
-                    id="cc-cvc" 
-                    value={ccFormData.cvc}
-                    onChange={handleCcInputChange}
-                    placeholder="123" 
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
-                  />
-                </div>
-              </div>
-              <div className="mb-4">
-                <label htmlFor="cc-cardholderName" className="block text-sm font-medium text-gray-700 mb-1">Nombre en la Tarjeta</label>
-                <input 
-                  type="text" 
-                  id="cc-cardholderName" 
-                  value={ccFormData.cardholderName}
-                  onChange={handleCcInputChange}
-                  placeholder="Nombre Apellido" 
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500" 
-                />
-              </div>
-              <div className="flex space-x-3">
-                <button 
-                  type="button"
-                  onClick={resetToInitialState}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                >
-                  Cancelar
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={!isCcFormValid}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${!isCcFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  Pagar
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {selectedOption === 'mercantilDebit' && (
-          <div>
-            <p className="text-gray-600 mb-4">Esta opción te redirigirá a la plataforma de pago de Mercantil para completar la transacción de forma segura.</p>
-            <div className="flex space-x-3">
-              <button 
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                onClick={resetToInitialState}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={handleMercantilPayment}
-              >
-                Continuar con Mercantil
-              </button>
-            </div>
-          </div>
-        )}
-
-        {selectedOption === 'crypto' && (
-          <div>
-            <p className="text-gray-600 mb-4">Selecciona la criptomoneda y sigue las instrucciones para enviar el pago a la dirección indicada.</p>
-            <div className="mb-4">
-              <label htmlFor="crypto-select" className="block text-sm font-medium text-gray-700 mb-1">Elige Criptomoneda:</label>
-              <select 
-                id="crypto-select" 
-                value={cryptoSelected}
-                onChange={handleCryptoSelectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="BTC">Bitcoin (BTC)</option>
-                <option value="ETH">Ethereum (ETH)</option>
-                <option value="USDT">Tether (USDT)</option>
-              </select>
-            </div>
-            <p className="text-sm text-gray-500 mb-2">Escanea el código QR o copia la dirección para realizar el pago.</p>
-            <div className="bg-gray-100 p-4 text-center rounded my-4 border border-gray-200">
-              <p className="text-gray-500">[Placeholder para Código QR y/o Dirección de Wallet]</p>
-            </div>
-            <div className="flex space-x-3">
-              <button 
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md font-medium hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                onClick={resetToInitialState}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-600 text-white rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                onClick={handleCryptoPayment}
-              >
-                He realizado el pago
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      <CreditCard 
+        onComplete={handlePaymentComplete}
+        onBack={resetToInitialState}
+      />
     );
-  };
+  }
 
-  // Si hay una opción seleccionada (excepto Pago Móvil que se maneja separadamente)
-  if (selectedOption && selectedOption !== 'pagoMovil') {
-    return renderPaymentForm();
+  if (showMercantilDebit) {
+    return (
+      <MercantilDebit 
+        onComplete={handlePaymentComplete}
+        onBack={resetToInitialState}
+      />
+    );
+  }
+
+  if (showCrypto) {
+    return (
+      <Crypto 
+        onComplete={handlePaymentComplete}
+        onBack={resetToInitialState}
+      />
+    );
   }
 
   // Mostrar la lista de opciones de pago si no hay ninguna seleccionada
