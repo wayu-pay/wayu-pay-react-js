@@ -8,6 +8,7 @@ import './index.css';
 // Exportamos usando alias para consistencia (opcional pero recomendado)
 import C2P from './components/C2P/C2P';
 import Checkout, { CheckoutComponent } from './components/checkout/Checkout';
+import { WayuPayProvider } from './components/common/WayuPayProvider';
 import type { Bank } from './core/types/Bank';
 import type { FormData } from './core/types/FormData';
 import type { C2PProps } from './core/types/C2PProps';
@@ -17,6 +18,7 @@ export {
   C2P,
   Checkout,
   CheckoutComponent,
+  WayuPayProvider,
 };
 
 // Exportación de tipos

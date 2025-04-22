@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
 import C2P from './C2P';
 
 import { Bank } from '../../core/types/Bank';

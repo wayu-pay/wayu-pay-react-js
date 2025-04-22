@@ -19,6 +19,12 @@ const config: StorybookConfig = {
     "builder": "@storybook/builder-vite"
   },
   "viteFinal": async (config) => {
+    if (config.resolve) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@': path.resolve(__dirname, '../src'),
+      };
+    }
     return config;
   }
 };
