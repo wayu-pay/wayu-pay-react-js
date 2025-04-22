@@ -196,6 +196,9 @@ const Checkout: React.FC<CheckoutProps> = ({ onComplete, onError, onPaymentStart
           </div>
         ))}
       </div>
+      <footer className="text-center mt-6 text-sm text-gray-500">
+        <span>Powered by <strong className="font-semibold">Wayu Pay</strong></span>
+      </footer>
     </div>
   );
 };
