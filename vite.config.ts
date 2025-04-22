@@ -16,6 +16,9 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     }
   },
+  css: {
+    postcss: './postcss.config.js',
+  },
   build: {
     lib: {
       // Podría ser el punto de entrada de tu librería,
@@ -38,7 +41,13 @@ export default defineConfig({
           react: 'React',
           'react-dom': 'ReactDOM',
         },
+        // Asegúrate de que CSS se exporte como un archivo separado
+        assetFileNames: (assetInfo) => {
+          return assetInfo.name === 'style.css' ? 'wayu-pay-react.css' : assetInfo.name || '';
+        },
       },
     },
+    // Asegúrate de que el CSS se incluya
+    cssCodeSplit: false,
   },
 }); 
