@@ -1,10 +1,10 @@
 {
   "name": "wayu-pay-react-components",
-  "version": "1.0.0-alpha.2",
+  "version": "1.0.0-alpha.3",
   "description": "React component library for Wayu Pay flow",
   "type": "module",
-  "main": "./dist/wayu-pay-react.umd.js",
-  "module": "./dist/wayu-pay-react.es.js",
+  "main": "./dist/wayu-pay-react-components.umd.js",
+  "module": "./dist/wayu-pay-react-components.es.js",
   "types": "./dist/index.d.ts",
   "style": "./dist/wayu-pay-react-components.css",
   "files": [

@@ -24,11 +24,11 @@ export default defineConfig({
       // Podría ser el punto de entrada de tu librería,
       // ej. src/index.ts
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'WayuPayReact',
+      name: 'WayuPayReactComponents',
       // Los formatos adecuados dependerán de tu caso de uso
       // Se recomienda generar 'es' y 'umd'
       formats: ['es', 'umd'],
-      fileName: (format) => `wayu-pay-react.${format}.js`,
+      fileName: (format) => `wayu-pay-react-components.${format}.js`,
     },
     rollupOptions: {
       // Asegúrate de externalizar las dependencias que no deben
@@ -43,7 +43,7 @@ export default defineConfig({
         },
         // Asegúrate de que CSS se exporte como un archivo separado
         assetFileNames: (assetInfo) => {
-          return assetInfo.name === 'style.css' ? 'wayu-pay-react.css' : assetInfo.name || '';
+          return assetInfo.name === 'style.css' ? 'wayu-pay-react-components.css' : assetInfo.name || '';
         },
       },
     },
